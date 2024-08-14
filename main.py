@@ -92,7 +92,8 @@ class CrazyTimeApp:
             end_angle = start_angle + angle_per_segment
             color = self.segment_colors[segment]
             
-            if highlight_positions and i in highlight_positions:
+            # Highlight the predicted slots
+            if highlight_positions and (len(self.wheel_segments) - 1 - i) in highlight_positions:
                 color = "orange"
                 
             self.canvas.create_arc((50, 50, 550, 550), start=start_angle, extent=angle_per_segment, fill=color, outline='black')
@@ -216,7 +217,17 @@ class CrazyTimeApp:
                 self.predicted_positions = possible_winning_slots
 
                 winning_slots = [self.wheel_segments[i] for i in self.predicted_positions]
-                self.status_label.config(text=f"Possible Winning Slots: {', '.join(winning_slots)}")
+
+                slot_counts = {}
+                for slot in winning_slots:
+                    slot_counts[slot] = slot_counts.get(slot, 0) + 1
+
+                total_slots = len(winning_slots)
+                slot_percentages = {slot: (count / total_slots) * 100 for slot, count in slot_counts.items()}
+
+                display_text = "Possible Winning Slots: " + ', '.join([f"{slot} ({slot_percentages[slot]:.2f}%)"
+                                                                        for slot in slot_percentages])
+                self.status_label.config(text=display_text)
 
                 self.draw_wheel(highlight_positions=self.predicted_positions)
 
